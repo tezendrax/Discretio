@@ -1,0 +1,31 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Datasets and large caches
+data/
+iddped_data/
+*.pkl
+*.h5
+*.tar.gz
+*.zip
+Doc/DOC-20260814-WA0001 (1).pdf
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

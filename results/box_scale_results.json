@@ -1,0 +1,59 @@
+{
+  "Constant Velocity (Kinematic)": {
+    "ground_anchored": {
+      "trajectory_divergence_d_tau": 3.25520829846937e-07,
+      "mean_speed_orig": 40.58722786767578,
+      "mean_speed_intervened": 40.58722686767578,
+      "speed_ratio": 0.9999999753617074,
+      "foot_y_shift": 0.0,
+      "behavioral_hesitation_detected": false,
+      "perspective_depth_confusion": false,
+      "scale_invariant": true
+    },
+    "centroid_scaled_control": {
+      "trajectory_divergence_d_tau": 14.94838809967041,
+      "mean_speed_orig": 40.58722786767578,
+      "mean_speed_intervened": 40.587215423583984,
+      "speed_ratio": 0.999999693398824,
+      "foot_y_shift": -14.94838809967041,
+      "behavioral_hesitation_detected": false,
+      "perspective_depth_confusion": true,
+      "scale_invariant": false
+    }
+  },
+  "Neural BBox LSTM (Learned)": {
+    "ground_anchored": {
+      "trajectory_divergence_d_tau": 0.25859493017196655,
+      "mean_speed_orig": 3.15360526902771,
+      "mean_speed_intervened": 3.3407328128814697,
+      "speed_ratio": 1.0593376557591347,
+      "foot_y_shift": -0.04939927160739899,
+      "behavioral_hesitation_detected": false,
+      "perspective_depth_confusion": false,
+      "scale_invariant": true
+    },
+    "centroid_scaled_control": {
+      "trajectory_divergence_d_tau": 14.928715705871582,
+      "mean_speed_orig": 3.15360526902771,
+      "mean_speed_intervened": 3.2006640434265137,
+      "speed_ratio": 1.0149222145399674,
+      "foot_y_shift": -14.927713394165039,
+      "behavioral_hesitation_detected": false,
+      "perspective_depth_confusion": true,
+      "scale_invariant": false
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
