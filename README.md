@@ -1,234 +1,224 @@
-# DISCRETIO: Box-Scale Counterfactual Intervention on IDD-PeD
+# 🚗 DISCRETIO: Testing If AI Models Care About Kids on the Road
 
-![Execution](https://img.shields.io/badge/Execution-Local%20CPU-brightgreen)
-![Dataset](https://img.shields.io/badge/Dataset-IDD--PeD%20(IIIT%20Hyderabad)-blue)
-![Framework](https://img.shields.io/badge/Evaluation-DISCRETIO%20Prior%20Discovery-orange)
+![Execution](https://img.shields.io/badge/Runs%20On-Standard%20Laptop%20CPU-brightgreen)
+![Dataset](https://img.shields.io/badge/Dataset-IDD--PeD%20(Real%20Indian%20Traffic)-blue)
+![Language](https://img.shields.io/badge/Language-Simple%20English-success)
 
-> **DISCRETIO** is an empirical evaluation framework designed to uncover what predictive trajectory models *implicitly learn* beyond visible observation. This project implements and tests the **Ground-Anchored Box-Scale Intervention** on the **IDD-PeD** (Indian Driving Dataset - Pedestrian) dataset, running 100% locally on a standard CPU.
-
----
-
-## 📖 Table of Contents
-
-- [The Core Task & What You Did](#-the-core-task--what-you-did)
-- [The Perspective Geometry Challenge](#-the-perspective-geometry-challenge)
-- [Architecture & Workflow Flowchart](#-architecture--workflow-flowchart)
-- [Dataset, Curated Clips & CSV Manifests](#-dataset-curated-clips--csv-manifests)
-- [Empirical Box Intervention Techniques](#-empirical-box-intervention-techniques)
-- [Diagnostic Metrics Formulation](#-diagnostic-metrics-formulation)
-- [CPU Benchmark Results & Summary Table](#-cpu-benchmark-results--summary-table)
-- [Scientific Findings & Conclusions](#-scientific-findings--conclusions)
-- [Repository Structure](#-repository-structure)
-- [How to Run Locally (CPU)](#-how-to-run-locally-cpu)
+> **Welcome!** This project investigates a simple but critical question:  
+> **When an AI predicts what someone will do on the street, does it realize when someone is a child and might hesitate or stop, or does it treat everyone like an adult?**  
+> 
+> Here, you will find what the project is, **exactly what I did**, the **clever technique I used**, the **clips and data files from Google Drive**, the **step-by-step flowchart**, and the **final results**—all explained in simple, everyday English!
 
 ---
 
-## 💡 The Core Task & What You Did
+## 🎤 Quick 1-Minute Pitch (How to Explain This Project to Anyone)
 
-### The Problem in Trajectory Prediction
-Autonomous mobility systems commonly evaluate trajectory predictors (**BiTraP**, **SGNet**, LSTM forecasters) purely on spatial displacement metrics (ADE/FDE). However, these models operate directly on **bounding box coordinate sequences** $[x_1, y_1, x_2, y_2]$ rather than raw pixels. Conventional evaluations fail to reveal whether these models carry **latent behavioral expectations** (e.g., anticipating child vulnerability, sudden hesitation, or slower crossing).
-
-### What You Formulated in This Work:
-1. **The "Box-Scale Intervention" Idea (Cheap & Quick):**  
-   Instead of generating high-cost synthetic videos with diffusion models or simulators, you proposed directly scaling the bounding box dimensions of observed pedestrians to simulate a child's scale.
-2. **Identifying the Perspective Confound:**  
-   You identified the critical physical constraint: in monocular camera perspective, simply shrinking a 2D bounding box can make the pedestrian look **"farther down the road"** rather than physically smaller. You recognized that the **foot position (ground contact point $y_2$) and horizontal center ($x_{\text{foot}}$) must remain strictly invariant**.
-3. **Curating Real-World Benchmark Clips:**  
-   You sourced and integrated real IDD-PeD traffic events (`idd_ped_master_manifest.csv`) and curated 10 benchmark child interaction events (`selected_child_clips.json`) from the project data drive to anchor the synthetic interventions against empirical reality.
-4. **Empirical CPU Philosophy:**  
-   Recognizing that the optimal intervention is an empirical question, you formulated the strategy:  
-   > *"This method can be done on a CPU. Obviously which method is the best is going to be somewhat empirical. So instead of finding the perfect method we should just start running various techniques and check which one works the best."*
+> *"Imagine you are driving a car and you see someone near the curb. If it is a grown-up walking at normal speed, you expect them to keep walking. But if it is a 7-year-old child, you immediately become cautious—because kids can suddenly hesitate, stop, or dart across the street!*  
+> 
+> *Self-driving and trajectory AI models usually track people using simple rectangles called **bounding boxes**. My task was to test: **If we shrink an adult's box down to a child's size, will the AI expect them to slow down or hesitate?***  
+> 
+> *There was one big catch: if you just shrink a box, the computer thinks the person is standing far away down the road! So I created a **Ground-Anchored Box Technique** that glues the feet to the road and only lowers the head. I ran this on a standard CPU using real Indian traffic clips from Google Drive. The surprising result? Current AI trajectory models completely ignore size—they predict the exact same path for kids and adults! This proves we need safer AI models."*
 
 ---
 
-## 📐 The Perspective Geometry Challenge
+## 📚 Dictionary of Simple Terms (Read This First!)
 
-In flat-road monocular perspective, camera distance $Z$ to a pedestrian is governed by the vertical coordinate of their feet on the ground plane ($y_2$ or $y_{\text{foot}}$):
+Before diving in, here is what the words mean in plain English:
 
-$$Z \approx \frac{f \cdot H_{\text{cam}}}{y_2 - y_{\text{horizon}}}$$
+| Term | What It Actually Means |
+| :--- | :--- |
+| **Bounding Box** | A simple rectangle drawn around a person in a video so the computer knows where they are: $[x_1, y_1, x_2, y_2]$ (left, top, right, bottom). |
+| **Trajectory** | The path someone walks over time (like footsteps in the sand). |
+| **Trajectory Predictor** | An AI that looks at where someone walked for the last second and guesses where they will walk in the next 2 seconds. |
+| **Ground Contact Point ($y_2$)** | Where the person's feet touch the asphalt. In camera pictures, things on the road that are farther away have their feet higher up in the picture. |
+| **Perspective** | The camera trick where things close to you look big, and things far away look tiny. |
+| **Intervention** | Changing just one thing on purpose (like making the box shorter) to see how the AI reacts. |
+| **Counterfactual** | Asking: *"What would have happened if this person was a child instead of an adult, while walking in the exact same place?"* |
+| **CPU** | A normal computer processor. No expensive cloud supercomputer or heavy graphics card needed! |
 
+---
+
+## 🎯 What the Project Is
+
+Autonomous cars and robotics use **World Models** and **Trajectory Forecasters**. Usually, scientists judge these models by asking: *"Did the model guess the future footsteps close to the real footsteps?"*
+
+**The Discretio project asks a deeper question:**  
+> **Does the AI actually understand human behavior?**  
+When someone is hidden behind a bus, does the AI know they still exist? When a pedestrian is an elderly person or a young child, does the AI predict they might be slower or more hesitant?
+
+---
+
+## 🛠️ What *I* Did in This Work
+
+Here is my specific contribution to the project:
+
+1. **Came Up with the "Box-Scale Intervention" (Cheap & Fast):**  
+   Usually, testing this requires rendering expensive 3D video simulations or video generation diffusion models. I realized that models like **BiTraP** and **SGNet** only look at rectangular boxes $[x_1, y_1, x_2, y_2]$. So why not just shrink the box mathematically? It takes zero extra memory and runs in milliseconds on a CPU!
+2. **Solved the "Camera Distance Trap":**  
+   If you shrink a box from its center, the bottom of the box lifts into the air. In camera perspective, anything higher up on the road is interpreted as being **farther down the street**. I figured out that we must **lock the feet strictly to the road** ($y_2$ does not change) and only drop the top of the box ($y_1$) downward.
+3. **Fetched and Used Real-World Clips from Google Drive:**  
+   I pulled the curated IDD-PeD dataset files from the project Google Drive:
+   - `manifests/idd_ped_master_manifest.csv` (935 real traffic situations).
+   - `manifests/selected_child_clips.json` (10 real child clips with their real speeds and crossing choices).
+4. **Followed an Empirical CPU Philosophy:**  
+   Instead of guessing which math formula is best, I implemented **5 different techniques** and ran them on a CPU to compare the numbers and see what really happens.
+
+---
+
+## 📐 The Trick: Why Foot Position Matters (The Camera Trap)
+
+Look at this diagram to see why simply shrinking a box fails, and why my method works:
+
+```text
+       WRONG WAY (Center Shrinking)                 MY METHOD (Ground-Anchored Shrinking)
+    
+       Adult Box            Shrunk Box              Adult Box            Child Box
+    ┌─────────────┐                            ┌─────────────┐
+    │    HEAD     │        ┌───────────┐       │    HEAD     │
+    │             │   ->   │   HEAD    │       │             │   ->   ┌───────────┐ <-- Head drops down
+    │             │        │   FEET    │       │             │        │   HEAD    │
+    └──────┬──────┘        └─────┬─────┘       └──────┬──────┘        └─────┬─────┘
+         FEET                  FEET                 FEET                  FEET
+      (On Road)           (LIFTED UP!)            (On Road)            (STILL ON ROAD!)
+    
+    ❌ The feet lifted by 15 pixels!            ✅ The feet stayed in the EXACT same spot!
+    The AI thinks: "They didn't shrink;         The AI knows: "They are at the same distance,
+    they just moved 50 meters down the road!"   but they are physically shorter (A CHILD)!"
 ```
-      Centroid Scaling (WRONG: False Depth)          Ground-Anchored Scaling (CORRECT: Child Scale)
-         x1 ┌────────────────┐ x2                         x1' ┌──────────┐ x2'
-            │                │                                │          │   <-- Top lowered by (1 - α)*h
-            │   (xc, yc)     │                                │ (xc, yc')│
-            │                │                                │          │
-            └───────┬────────┘                                └────┬─────┘
-                 (x_foot, y2)                                   (x_foot, y2)  <-- y2 and x_foot UNCHANGED!
-            
-         ⚠️ Ground feet move UPWARD (-15px)           ✅ Ground contact locked to SAME road distance
-         Model assumes pedestrian is FARTHER AWAY     Model perceives physically SMALLER ACTOR (Child)
-```
 
 ---
 
-## 🔄 Architecture & Workflow Flowchart
+## 🔄 Compact Workflow Architecture
+
+Here is the entire system pipeline in one clear flowchart:
 
 ```mermaid
 flowchart TD
-    subgraph Data["1. Data Manifests & Stream Slicing"]
-        A["IDD-PeD Master Manifest\n(935 Real Events)"] --> B["Curated Child Clips\n(10 Sliced Reference Events)"]
-        B --> C["Trajectory Stream Loader\n(T_obs=15 frames, T_pred=30 frames)"]
-    end
+    A["📂 Step 1: Real Traffic Data (Google Drive)\n935 Real Events & 10 Curated Child Clips from IDD-PeD"] --> B["⏱️ Step 2: Slice Video Windows\n15 Frames History (0.5s) + 30 Frames Future (1.0s)"]
+    
+    B --> C{"✂️ Step 3: Apply Box Techniques\n(Tested 5 Variations on CPU)"}
+    
+    C --> T1["Technique 1: Proportional (65% Size, Feet Locked)"]
+    C --> T2["Technique 2: Height-Only (Head Lowered, Width Normal)"]
+    C --> T3["Technique 3: Moderate Scale (80% Size - Pre-Teen)"]
+    C --> T4["Technique 4: Extreme Scale (50% Size - Toddler)"]
+    C --> T5["Technique 5: Center Shrink (Control: Lets Feet Float)"]
+    
+    T1 & T2 & T3 & T4 & T5 --> D["🤖 Step 4: Run AI Trajectory Predictors\n(Constant Velocity Model & Neural LSTM Model)"]
+    
+    D --> E["📊 Step 5: Score the Output\nCheck: Did path change? Did speed drop? Did feet drift?"]
+    
+    E --> F["🏆 Final Conclusion:\nAI models ignore child size unless we explicitly teach them!"]
 
-    subgraph Techniques["2. Multi-Technique Empirical Box Interventions (CPU)"]
-        C --> T1["Tech 1: Ground-Anchored Proportional (α=0.65)"]
-        C --> T2["Tech 2: Ground-Anchored Height-Only (α=0.65)"]
-        C --> T3["Tech 3: Moderate Scale (α=0.80)"]
-        C --> T4["Tech 4: Extreme Scale (α=0.50)"]
-        C --> T5["Tech 5: Centroid-Scaled Control (Negative Baseline)"]
-    end
-
-    subgraph Models["3. CPU Model Rollout Engine"]
-        T1 & T2 & T3 & T4 & T5 --> M1["Constant Velocity (Kinematic Baseline)"]
-        T1 & T2 & T3 & T4 & T5 --> M2["Neural BBox LSTM (Learned Recurrent Model)"]
-        T1 & T2 & T3 & T4 & T5 --> M3["BiTraP / SGNet Checkpoint Adapter"]
-    end
-
-    subgraph Diagnostics["4. DISCRETIO Diagnostic Scoring"]
-        M1 & M2 & M3 --> D1["Trajectory Divergence (D_tau)"]
-        M1 & M2 & M3 --> D2["Speed & Hesitation Ratio (v_child / v_adult)"]
-        M1 & M2 & M3 --> D3["Ground Foot Drift (Δy_foot)"]
-        D1 & D2 & D3 --> RES["Empirical Findings: Behavioral Prior vs Depth Artifact"]
-    end
-
-    style Data fill:#eff6ff,stroke:#3b82f6,stroke-width:1px
-    style Techniques fill:#fef3c7,stroke:#f59e0b,stroke-width:1px
-    style Models fill:#ecfdf5,stroke:#10b981,stroke-width:1px
-    style Diagnostics fill:#fdf2f8,stroke:#ec4899,stroke-width:1px
+    style A fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style B fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style C fill:#ede9fe,stroke:#7c3aed,stroke-width:2px
+    style D fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    style E fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+    style F fill:#fef9c3,stroke:#ca8a04,stroke-width:2px
 ```
 
 ---
 
-## 📊 Dataset, Curated Clips & CSV Manifests
+## 📁 The Data & Clips Fetched from Google Drive
 
-All manifests are directly tracked in [`manifests/`](manifests/):
+We pulled real Indian traffic files from the Google Drive `data_local` folder into the [`manifests/`](manifests/) directory:
 
-| File | Scope & Scale | Key Annotations Tracked | Role in the Benchmark |
-| :--- | :--- | :--- | :--- |
-| **[`idd_ped_master_manifest.csv`](manifests/idd_ped_master_manifest.csv)** | 935 behavioral events (852 adults, 55 children, 28 seniors) | Event ID, video ID, track ID, $t_0$ frame, bounding boxes, ego speed, pedestrian speed, TTC, signal & road type, outcome. | **Full Empirical Ground Truth Pool** from Indian traffic. |
-| **[`selected_child_clips.json`](manifests/selected_child_clips.json)** | 10 curated benchmark child events | 150-frame windows ($T_{\text{obs}}=60 \to T_{\text{pred}}=90$), precise $[x_1, y_1, x_2, y_2]$ at $t_0$, TTC, hesitation counts. | **Child Baseline Reference** for crossing ($30\%$), jaywalking ($60\%$), and waiting ($10\%$). |
-| **[`selected_child_clips.csv`](manifests/selected_child_clips.csv)** | Tabular export of the 10 child events | Pedestrian speed ($0.75 - 10.5\text{ m/s}$), ego speed ($0 - 10.5\text{ m/s}$), TTC ($0.39 - 99\text{ s}$). | Quick querying and condition slicing. |
+### 1. `manifests/idd_ped_master_manifest.csv`
+- Contains **935 real pedestrian situations** recorded on Indian roads.
+- **People breakdown:** 852 adults, 55 children, 28 senior citizens.
+- **What they did:** 499 jaywalked across traffic, 89 used crosswalks, 79 stopped and waited.
+- **Road types:** 799 unsignalized (no traffic lights!), 136 signalized.
 
-### Smart Remote Video Extraction Scripts:
-- **[`scripts/download_selected_videos.py`](scripts/download_selected_videos.py)**: Uses HTTP Range requests to extract only target videos from CVIT tar archives without downloading 100GB of video.
-- **[`scripts/extract_clips_remote.py`](scripts/extract_clips_remote.py)**: Frame-accurate remote clip window extraction using byte-range FFmpeg streaming.
-- **[`scripts/trim_selected_clips.py`](scripts/trim_selected_clips.py)**: Trims video clips into exact 150-frame evaluation segments.
+### 2. `manifests/selected_child_clips.json` & `.csv`
+- Exactly **10 high-quality benchmark clips** featuring children.
+- Each clip gives:
+  - Exact frame window: 60 frames of past observation $\to$ 90 frames of future movement.
+  - Pedestrian speed: ranged from $0.75\text{ m/s}$ (hesitant kid) to $10.5\text{ m/s}$ (kid sprinting across).
+  - Time-To-Collision (TTC): from very urgent ($0.39\text{ seconds}$) to safe ($99\text{ seconds}$).
+  - Real outcome: $60\%$ jaywalked, $30\%$ crossed normally, $10\%$ waited.
 
----
-
-## 🔬 Empirical Box Intervention Techniques
-
-We test 5 distinct techniques on CPU to evaluate model sensitivity and perspective stability:
-
-1. **Tech 1: Ground-Anchored Proportional ($\alpha = 0.65$):**  
-   Reduces width and height proportionally while locking $y_2$ and $x_{\text{foot}}$ invariant.
-2. **Tech 2: Ground-Anchored Height-Only ($\alpha = 0.65$):**  
-   Only drops $y_1$ downward toward $y_2$; preserves original width $w$. Simulates shorter stature without altering horizontal occlusion footprint.
-3. **Tech 3: Moderate Scale ($\alpha = 0.80$):**  
-   Simulates older child / pre-teen scale to probe sensitivity gradients.
-4. **Tech 4: Extreme Child Scale ($\alpha = 0.50$):**  
-   Simulates toddler scale to test extreme boundary conditions.
-5. **Tech 5: Centroid Scaling Control ($\alpha = 0.65$):**  
-   Shrinks around $(x_c, y_c)$ without ground anchoring (negative control to measure depth confusion).
+### 3. Remote Video Download Scripts (`scripts/`)
+- `scripts/download_selected_videos.py`: Uses smart HTTP Range requests to download only the specific video files we need directly from the university server without having to download 100 gigabytes of data!
+- `scripts/extract_clips_remote.py`: Slices out just the 150 frames needed.
 
 ---
 
-## 📏 Diagnostic Metrics Formulation
+## 🧪 The 5 Techniques & Parameters We Tested
 
-For an original rollout $R$ and intervened rollout $R'$ over prediction horizon $T_{\text{pred}}$:
+All parameters and formulas used in [`src/intervention/box_scale.py`](src/intervention/box_scale.py):
 
-1. **Trajectory Divergence ($D_\tau$):**
-   $$D_\tau = \frac{1}{T_{\text{pred}}} \sum_{t=1}^{T_{\text{pred}}} \| \mathbf{p}_t^{\text{orig}} - \mathbf{p}_t^{\text{intervened}} \|_2$$
-2. **Speed & Hesitation Ratio ($S_{\text{ratio}}$):**
-   $$S_{\text{ratio}} = \frac{\bar{v}_{\text{child}}}{\bar{v}_{\text{adult}}}$$
-   - $S_{\text{ratio}} < 0.90 \implies$ Model anticipates child hesitation/slower crossing.
-   - $S_{\text{ratio}} \approx 1.0 \implies$ Model is scale-invariant.
-3. **Ground Foot-Y Drift ($\Delta y_{\text{foot}}$):**
-   $$\Delta y_{\text{foot}} = \frac{1}{T_{\text{pred}}} \sum_{t=1}^{T_{\text{pred}}} (y_{\text{foot}, t}^{\text{intervened}} - y_{\text{foot}, t}^{\text{orig}})$$
-   - $\Delta y_{\text{foot}} < -5.0\text{ px} \implies$ **Perspective Depth Confusion** (feet shifted upward toward horizon).
+| Technique Name | Scale ($\alpha$) | What It Does to the Box | Why We Tested It |
+| :--- | :---: | :--- | :--- |
+| **Tech 1: Ground-Anchored Proportional** | $0.65$ | Shrinks width and height to $65\%$, **feet stay on the ground**. | Mimics an average 7-year-old child ($1.1\text{m}$ tall vs $1.7\text{m}$ adult). |
+| **Tech 2: Ground-Anchored Height-Only** | $0.65$ | Shrinks height to $65\%$, leaves width normal, **feet stay on the ground**. | Tests if the AI cares about height alone or needs body width to shrink too. |
+| **Tech 3: Moderate Scale** | $0.80$ | Shrinks to $80\%$, feet locked. | Mimics an older child / pre-teen. |
+| **Tech 4: Extreme Scale** | $0.50$ | Shrinks to $50\%$, feet locked. | Mimics a toddler. |
+| **Tech 5: Centroid Shrink (Control)** | $0.65$ | Shrinks around the center point. **Feet lift up!** | Used as a test to prove that without my foot-lock, the AI gets confused about distance. |
 
----
-
-## 📈 CPU Benchmark Results & Summary Table
-
-Below are the empirical results obtained across 50 trajectory sequences executed on local CPU:
-
-| Model Evaluated | Intervention Technique | $D_\tau$ (Displacement) | Speed Ratio ($v' / v$) | Ground Foot Shift ($\Delta y$) | Perspective Preserved? | Finding |
-| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
-| **Constant Velocity** | Tech 1: Ground-Anchored Proportional ($\alpha=0.65$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | **YES** | **Scale Invariant** |
-| **Constant Velocity** | Tech 2: Ground-Anchored Height-Only ($\alpha=0.65$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | **YES** | **Scale Invariant** |
-| **Constant Velocity** | Tech 3: Moderate Scale ($\alpha=0.80$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | **YES** | **Scale Invariant** |
-| **Constant Velocity** | Tech 4: Extreme Scale ($\alpha=0.50$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | **YES** | **Scale Invariant** |
-| **Constant Velocity** | Tech 5: Centroid-Scaled Control ($\alpha=0.65$) | **$14.95\text{ px}$** | $1.000$ | **$-14.95\text{ px}$** | **NO** | **Depth Confused** |
-| **Neural BBox LSTM** | Tech 1: Ground-Anchored Proportional ($\alpha=0.65$) | **$0.27\text{ px}$** | $1.035$ | **$-0.13\text{ px}$** | **YES** | **Scale Invariant** |
-| **Neural BBox LSTM** | Tech 2: Ground-Anchored Height-Only ($\alpha=0.65$) | **$0.24\text{ px}$** | $1.033$ | **$-0.17\text{ px}$** | **YES** | **Scale Invariant** |
-| **Neural BBox LSTM** | Tech 3: Moderate Scale ($\alpha=0.80$) | **$0.24\text{ px}$** | $1.038$ | **$-0.15\text{ px}$** | **YES** | **Scale Invariant** |
-| **Neural BBox LSTM** | Tech 4: Extreme Scale ($\alpha=0.50$) | **$0.30\text{ px}$** | $1.026$ | **$-0.13\text{ px}$** | **YES** | **Scale Invariant** |
-| **Neural BBox LSTM** | Tech 5: Centroid-Scaled Control ($\alpha=0.65$) | **$15.09\text{ px}$** | $1.037$ | **$-15.09\text{ px}$** | **NO** | **Depth Confused** |
+### Parameters Used:
+- **Observation Window ($T_{\text{obs}}$):** $15\text{ frames}$ ($0.5\text{ seconds}$ of walking history).
+- **Future Horizon ($T_{\text{pred}}$):** $30\text{ frames}$ ($1.0\text{ second}$ into the future).
+- **Camera Frame Rate:** $30\text{ frames per second (FPS)}$.
+- **Child Scale Factor ($\alpha$):** $0.65$ (average child-to-adult height ratio).
 
 ---
 
-## 🏆 Scientific Findings & Conclusions
+## 📊 The Experimental Results (The Numbers!)
 
-1. **The Ground-Anchoring Law:**  
-   Centroid scaling produces an immediate **$\approx 15\text{ px}$ upward shift in ground contact**, tricking trajectory models into assuming the agent is further down the road. Ground anchoring completely eliminates this artifact ($\Delta y \approx 0.00\text{ px}$).
-2. **Current Forecasters Lack Latent Actor Priors:**  
-   Both Constant Velocity and Neural BBox LSTM predictors are essentially **scale-invariant** ($D_\tau \le 0.30\text{ px}$, speed ratio $\approx 1.0$). They predict future trajectories solely from past centroid displacement vectors, ignoring actor scale unless explicitly conditioned on semantic class labels.
-3. **Empirical Child Ground Truth (IDD-PeD):**  
-   Real child pedestrians in Indian traffic exhibit high crossing entropy: $60\%$ jaywalking, $30\%$ crossing, and $10\%$ waiting, with speeds varying dramatically between $0.75\text{ m/s}$ (cautious/hesitant) and $10.5\text{ m/s}$ (running). Trajectory models that output identical deterministic paths for adults and children fail to reflect real-world child uncertainty.
+We tested these techniques across 50 pedestrian tracks using standard CPU execution. Here is the exact scorecard:
 
----
-
-## 📁 Repository Structure
-
-```text
-Discretio/
-├── manifests/                    # Real IDD-PeD manifests & curated clips
-│   ├── idd_ped_master_manifest.csv   # 935 behavioral interaction events
-│   ├── selected_child_clips.json     # 10 curated benchmark child clips
-│   └── selected_child_clips.csv      # Tabular attributes (speed, TTC, outcome)
-├── src/                          # Core modular implementation
-│   ├── intervention/             # Ground-anchored & height-only transformations
-│   │   └── box_scale.py
-│   ├── data/                     # IDD-PeD sequence loader & unnester
-│   │   └── iddped_loader.py
-│   ├── models/                   # Trajectory predictors & BiTraP/SGNet adapter
-│   │   └── trajectory_probe.py
-│   └── evaluation/               # D_tau, speed ratio, foot shift diagnostics
-│       └── metrics.py
-├── scripts/                      # Standalone CLI tools & experiment runners
-│   ├── run_box_scale_experiment.py   # Multi-technique CPU benchmark runner
-│   ├── download_selected_videos.py   # HTTP Range video downloader
-│   ├── extract_clips_remote.py       # Remote byte-range clip extractor
-│   └── trim_selected_clips.py        # Frame-accurate clip trimmer
-├── results/                      # Generated benchmark outputs
-│   └── box_scale_results.json        # Detailed metrics for all models & techniques
-├── tests/                        # Comprehensive unit tests
-│   ├── test_box_scale.py         # Mathematical invariant tests (foot locked)
-│   ├── test_loader.py            # Dataset loader verification
-│   └── test_models.py            # Model probing verification
-└── README.md                     # Main documentation & benchmark report
-```
+| Model Tested | Technique | Future Path Shift ($D_\tau$) | Speed Ratio (Child / Adult) | Feet Shift on Road ($\Delta y$) | Did Perspective Stay Correct? | Finding |
+| :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| **Constant Velocity** | Tech 1: Proportional ($65\%$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Constant Velocity** | Tech 2: Height-Only ($65\%$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Constant Velocity** | Tech 3: Moderate ($80\%$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Constant Velocity** | Tech 4: Extreme ($50\%$) | **$0.00\text{ px}$** | $1.000$ | **$0.00\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Constant Velocity** | Tech 5: Center Shrink (Control) | **$14.95\text{ px}$** | $1.000$ | **$-14.95\text{ px}$** | ❌ **NO** | **Depth Confused** |
+| **Neural BBox LSTM** | Tech 1: Proportional ($65\%$) | **$0.27\text{ px}$** | $1.035$ | **$-0.13\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Neural BBox LSTM** | Tech 2: Height-Only ($65\%$) | **$0.24\text{ px}$** | $1.033$ | **$-0.17\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Neural BBox LSTM** | Tech 3: Moderate ($80\%$) | **$0.24\text{ px}$** | $1.038$ | **$-0.15\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Neural BBox LSTM** | Tech 4: Extreme ($50\%$) | **$0.30\text{ px}$** | $1.026$ | **$-0.13\text{ px}$** | ✅ **YES** | **Scale Invariant** |
+| **Neural BBox LSTM** | Tech 5: Center Shrink (Control) | **$15.09\text{ px}$** | $1.037$ | **$-15.09\text{ px}$** | ❌ **NO** | **Depth Confused** |
 
 ---
 
-## ⚡ How to Run Locally (CPU)
+## 🏆 What the Results Mean (The Big Conclusions)
 
-Clone the repository and run the entire suite locally in seconds:
+1. **Proof that the Ground-Anchor Technique Works (100% Success):**  
+   In Techniques 1 to 4, the foot drift was **$0.00\text{ px}$**. The feet never left the pavement. In Technique 5 (the naive way), the feet drifted by **$15\text{ pixels}$ upward**, which proves that without my method, the AI thinks the person is standing far away!
+2. **Current AI Models Are Blind to Children:**  
+   Look at the Speed Ratio for the models: it is almost exactly $1.000$, and the path shift ($D_\tau$) is less than $0.3\text{ pixels}$!  
+   **This means current trajectory prediction models predict the exact same path for a small child as they do for a full-grown adult.** They only care about velocity arrows, not who the person is!
+3. **Why This Matters for Autonomous Cars:**  
+   In real life, our IDD-PeD dataset proves that children are unpredictable ($60\%$ of them jaywalked and their speeds jumped between slow walking and fast sprinting). If an autonomous vehicle treats a child like an adult, it won't leave extra safety margins.
+
+---
+
+## 🚀 How to Run It Yourself on Any Computer (CPU)
+
+You don't need any special graphics card. Just open your terminal and run:
 
 ```bash
-# 1. Clone repository
+# 1. Download this repository
 git clone https://github.com/tezendrax/Discretio.git
 cd Discretio
 
-# 2. Run unit tests
+# 2. Run the unit tests (takes 2 seconds)
 python tests/test_box_scale.py
 python tests/test_loader.py
 python tests/test_models.py
 
-# 3. Run the multi-technique CPU benchmark
+# 3. Run the full experiment on CPU
 python scripts/run_box_scale_experiment.py
 ```
 
-Results will be printed to your terminal and saved to `results/box_scale_results.json`.
+The script will test all 5 techniques, print the summary table to your screen, and save the detailed numbers into `results/box_scale_results.json`!
+
+---
+
+## 👨‍💻 Project Information & Credits
+- **Project:** DISCRETIO Benchmarking Framework
+- **Implementation & Box Technique:** Tejendra Singh ([@tezendrax](https://github.com/tezendrax))
+- **Repository:** [https://github.com/tezendrax/Discretio](https://github.com/tezendrax/Discretio)
+- **Dataset:** IDD-PeD (CVIT, IIIT Hyderabad)
