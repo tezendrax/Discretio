@@ -88,79 +88,92 @@ Look at this diagram to see why simply shrinking a box fails, and why my method 
 
 ---
 
-## 🔄 Compact Workflow Architecture
+## 🔄 Complete Step-by-Step Workflow (How Everything Works)
 
-Here is the entire system pipeline in one clear flowchart:
+Here is the entire process written in plain, human English from start to finish. For every single step, we break down **what we are doing**, **what we are using**, **why we are doing it**, and **what we got**:
 
 ```mermaid
 flowchart TD
-    A["📂 Step 1: Real Traffic Data (Google Drive)\n935 Real Events & 10 Curated Child Clips from IDD-PeD"] --> B["⏱️ Step 2: Slice Video Windows\n15 Frames History (0.5s) + 30 Frames Future (1.0s)"]
-    
-    B --> C{"✂️ Step 3: Apply Box Techniques\n(Tested 5 Variations on CPU)"}
-    
-    C --> T1["Technique 1: Proportional (65% Size, Feet Locked)"]
-    C --> T2["Technique 2: Height-Only (Head Lowered, Width Normal)"]
-    C --> T3["Technique 3: Moderate Scale (80% Size - Pre-Teen)"]
-    C --> T4["Technique 4: Extreme Scale (50% Size - Toddler)"]
-    C --> T5["Technique 5: Center Shrink (Control: Lets Feet Float)"]
-    
-    T1 & T2 & T3 & T4 & T5 --> D["🤖 Step 4: Run AI Trajectory Predictors\n(Constant Velocity Model & Neural LSTM Model)"]
-    
-    D --> E["📊 Step 5: Score the Output\nCheck: Did path change? Did speed drop? Did feet drift?"]
-    
-    E --> F["🏆 Final Conclusion:\nAI models ignore child size unless we explicitly teach them!"]
+    S1["📍 Step 1: Real Traffic Data Ingestion\n(Fetch 935 real situations & 10 child clips from Drive)"] --> S2["⏱️ Step 2: Time Window Slicing\n(Slice 15 past frames history & 30 future frames to predict)"]
+    S2 --> S3["✂️ Step 3: Apply Box-Scale Intervention\n(Shrink box to child size while locking feet to the road)"]
+    S3 --> S4["🤖 Step 4: Run AI Trajectory Predictors\n(Feed adult vs child boxes into models on CPU)"]
+    S4 --> S5["📊 Step 5: Diagnostic Scoring\n(Check path shift, speed hesitation, and foot-drift error)"]
+    S5 --> S6["🏆 Step 6: Scientific Conclusions\n(Prove ground-anchoring works & reveal AI scale-blindness)"]
 
-    style A fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
-    style B fill:#fef3c7,stroke:#d97706,stroke-width:2px
-    style C fill:#ede9fe,stroke:#7c3aed,stroke-width:2px
-    style D fill:#fce7f3,stroke:#db2777,stroke-width:2px
-    style E fill:#dcfce7,stroke:#16a34a,stroke-width:2px
-    style F fill:#fef9c3,stroke:#ca8a04,stroke-width:2px
+    style S1 fill:#e0f2fe,stroke:#0284c7,stroke-width:2px
+    style S2 fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style S3 fill:#ede9fe,stroke:#7c3aed,stroke-width:2px
+    style S4 fill:#fce7f3,stroke:#db2777,stroke-width:2px
+    style S5 fill:#dcfce7,stroke:#16a34a,stroke-width:2px
+    style S6 fill:#fef9c3,stroke:#ca8a04,stroke-width:2px
 ```
 
 ---
 
-## 📁 The Data & Clips Fetched from Google Drive
-
-We pulled real Indian traffic files from the Google Drive `data_local` folder into the [`manifests/`](manifests/) directory:
-
-### 1. `manifests/idd_ped_master_manifest.csv`
-- Contains **935 real pedestrian situations** recorded on Indian roads.
-- **People breakdown:** 852 adults, 55 children, 28 senior citizens.
-- **What they did:** 499 jaywalked across traffic, 89 used crosswalks, 79 stopped and waited.
-- **Road types:** 799 unsignalized (no traffic lights!), 136 signalized.
-
-### 2. `manifests/selected_child_clips.json` & `.csv`
-- Exactly **10 high-quality benchmark clips** featuring children.
-- Each clip gives:
-  - Exact frame window: 60 frames of past observation $\to$ 90 frames of future movement.
-  - Pedestrian speed: ranged from $0.75\text{ m/s}$ (hesitant kid) to $10.5\text{ m/s}$ (kid sprinting across).
-  - Time-To-Collision (TTC): from very urgent ($0.39\text{ seconds}$) to safe ($99\text{ seconds}$).
-  - Real outcome: $60\%$ jaywalked, $30\%$ crossed normally, $10\%$ waited.
-
-### 3. Remote Video Download Scripts (`scripts/`)
-- `scripts/download_selected_videos.py`: Uses smart HTTP Range requests to download only the specific video files we need directly from the university server without having to download 100 gigabytes of data!
-- `scripts/extract_clips_remote.py`: Slices out just the 150 frames needed.
+### 📍 Step 1: Getting the Real Traffic Data (From Google Drive)
+- **What we are doing:** We gather real-world video annotations of pedestrians crossing streets in chaotic Indian traffic. We make sure we have both adult data and real child data so our test is rooted in reality.
+- **What we are using:** 
+  - `manifests/idd_ped_master_manifest.csv`: 935 real traffic situations (852 adults, 55 children, 28 seniors).
+  - `manifests/selected_child_clips.json`: 10 real benchmark child clips (speed: $0.75$ to $10.5\text{ m/s}$; $60\%$ jaywalked, $30\%$ crossed normally, $10\%$ stopped and waited).
+  - `scripts/download_selected_videos.py`: Smart script using HTTP Range headers to fetch only the needed clips directly from the server without downloading 100GB of video.
+- **Why we are doing it:** We cannot use fake video game simulations because scientists and reviewers want to test against real human behavior from actual street cameras.
+- **What we got:** A clean, verified list of real pedestrian tracks with their real walking speeds, time-to-collision (TTC), and crossing choices.
 
 ---
 
-## 🧪 The 5 Techniques & Parameters We Tested
+### 📍 Step 2: Slicing the History and Future Time Windows
+- **What we are doing:** For every pedestrian walking in the video, we divide their movement into two distinct parts:
+  1. The **Past** (what the AI gets to see to understand the walking direction).
+  2. The **Future** (what the AI has to guess).
+- **What we are using:** 
+  - `src/data/iddped_loader.py`
+  - Parameters:
+    - **Past History ($T_{\text{obs}}$):** $15\text{ frames}$ (about $0.5\text{ seconds}$ of walking history).
+    - **Future Horizon ($T_{\text{pred}}$):** $30\text{ frames}$ (about $1.0\text{ second}$ into the future).
+    - **Camera Frame Rate:** $30\text{ frames per second (FPS)}$.
+- **Why we are doing it:** Trajectory AI models always take a short history of bounding boxes to calculate the person's current velocity and heading, then try to roll out their path into the future.
+- **What we got:** Formatted pairs of `obs_boxes` (15 past bounding boxes) and `pred_boxes` (30 future ground-truth bounding boxes).
 
-All parameters and formulas used in [`src/intervention/box_scale.py`](src/intervention/box_scale.py):
+---
 
-| Technique Name | Scale ($\alpha$) | What It Does to the Box | Why We Tested It |
-| :--- | :---: | :--- | :--- |
-| **Tech 1: Ground-Anchored Proportional** | $0.65$ | Shrinks width and height to $65\%$, **feet stay on the ground**. | Mimics an average 7-year-old child ($1.1\text{m}$ tall vs $1.7\text{m}$ adult). |
-| **Tech 2: Ground-Anchored Height-Only** | $0.65$ | Shrinks height to $65\%$, leaves width normal, **feet stay on the ground**. | Tests if the AI cares about height alone or needs body width to shrink too. |
-| **Tech 3: Moderate Scale** | $0.80$ | Shrinks to $80\%$, feet locked. | Mimics an older child / pre-teen. |
-| **Tech 4: Extreme Scale** | $0.50$ | Shrinks to $50\%$, feet locked. | Mimics a toddler. |
-| **Tech 5: Centroid Shrink (Control)** | $0.65$ | Shrinks around the center point. **Feet lift up!** | Used as a test to prove that without my foot-lock, the AI gets confused about distance. |
+### 📍 Step 3: Applying the Box-Scale Intervention (The Core Technique)
+- **What we are doing:** We take the adult's 15 past bounding boxes and shrink them down to child size. But to avoid tricking the camera into thinking the person is just far away, we **lock their feet to the road** and only drop their head downward! We test 5 different variations to compare the math.
+- **What we are using:** 
+  - `src/intervention/box_scale.py`
+  - The 5 tested techniques:
+    1. **Technique 1: Ground-Anchored Proportional ($\alpha = 0.65$):** Both width and height shrink to 65% (average 7-year-old size). Feet strictly stay on the pavement ($y_2$ locked).
+    2. **Technique 2: Ground-Anchored Height-Only ($\alpha = 0.65$):** Only height shrinks down, width stays normal. Feet locked.
+    3. **Technique 3: Moderate Scale ($\alpha = 0.80$):** Shrunk to 80% size (older child / pre-teen). Feet locked.
+    4. **Technique 4: Extreme Scale ($\alpha = 0.50$):** Shrunk to 50% size (toddler). Feet locked.
+    5. **Technique 5: Center Shrink Control ($\alpha = 0.65$):** The naive way—shrinking around the center. The feet float up into the air!
+- **Why we are doing it:** This is the heart of the experiment: we change *only body size* while keeping the exact same walking speed and street position, so we can isolate whether the AI has a child safety prior.
+- **What we got:** 5 sets of counterfactual child boxes ready to be fed into the AI models.
 
-### Parameters Used:
-- **Observation Window ($T_{\text{obs}}$):** $15\text{ frames}$ ($0.5\text{ seconds}$ of walking history).
-- **Future Horizon ($T_{\text{pred}}$):** $30\text{ frames}$ ($1.0\text{ second}$ into the future).
-- **Camera Frame Rate:** $30\text{ frames per second (FPS)}$.
-- **Child Scale Factor ($\alpha$):** $0.65$ (average child-to-adult height ratio).
+---
+
+### 📍 Step 4: Running the Trajectory Predictors on CPU
+- **What we are doing:** We feed both the original adult boxes and each of the 5 shrunk box sets into AI trajectory predictors. We record where the models predict the person will walk over the next 30 frames.
+- **What we are using:** 
+  - `src/models/trajectory_probe.py`
+  - Tested models:
+    - **Constant Velocity Predictor:** Simple physics model that projects forward along the last walking direction.
+    - **Neural BBox LSTM Predictor:** Deep learning neural network trained to forecast future box coordinates.
+    - **BiTraP & SGNet Checkpoint Adapter:** Ready to load official pretrained weights.
+  - **Hardware:** Runs 100% on a standard laptop CPU in just a few seconds!
+- **Why we are doing it:** To compare: *Did the AI predict a different path or slower speed when the person became a child?*
+- **What we got:** Predicted future rollouts ($R_{\text{adult}}$ vs. $R_{\text{child}}$) across all models and all 5 techniques.
+
+---
+
+### 📍 Step 5: Scoring the Diagnostic Results
+- **What we are doing:** We compare the adult prediction against the child prediction using 3 simple mathematical diagnostic checks:
+  1. **Path Divergence ($D_\tau$):** How many pixels away is the child's predicted path from the adult's path?
+  2. **Speed & Hesitation Ratio ($S_{\text{ratio}}$):** Did the AI predict the child will slow down ($< 0.90$) or walk at the exact same speed ($1.00$)?
+  3. **Feet Drift on Road ($\Delta y_{\text{foot}}$):** Did the feet stay on the pavement ($0.0\text{ px}$), or did they float upward ($< -5.0\text{ px}$), proving the model got confused about distance?
+- **What we are using:** 
+  - `src/evaluation/metrics.py` and `scripts/run_box_scale_experiment.py`
+- **Why we are doing it:** To prove whether a model change is a real behavioral safety reaction or just an optical camera perspective mistake.
+- **What we got:** The final quantitative benchmark table and conclusive proof.
 
 ---
 
