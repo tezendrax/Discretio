@@ -9,6 +9,7 @@
 ## 📖 Table of Contents
 
 - [Overview & Motivation](#-overview--motivation)
+- [Task 1: Box-Scale Intervention Specification](TASK_README.md)
 - [Core Concept: Latent Behavioral Priors](#-core-concept-latent-behavioral-priors)
 - [The 4 Prior Families](#-the-4-prior-families)
 - [End-to-End Workflow & Pipeline Architecture](#-end-to-end-workflow--pipeline-architecture)
@@ -306,4 +307,5 @@ If you use DISCRETIO in your research, please cite:
 - **World Models:** Ha & Schmidhuber (2018). *World Models.*
 - **Dreamer Series:** Hafner et al. (2020, 2023). *Dream to Control / Mastering Diverse Domains through World Models.*
 - **JEPA Architecture:** LeCun (2022). *A Path Towards Autonomous Machine Intelligence.*
+
 
