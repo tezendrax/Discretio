@@ -125,7 +125,7 @@ Here are the exact numbers I got from testing 50 trajectory sequences on CPU:
 
 ---
 
-## 🏆 5. My Key Meeting Takeaways & Conclusions
+## 🏆 5. My Key Takeaways & Conclusions
 
 1. **My Ground-Anchoring Method Succeeded (100% Stability):**  
    In Techniques 1 to 4, the feet remained glued to the pavement with **$0.00\text{ px}$ drift**. In Technique 5 (the naive way), the feet floated upward by **$15\text{ pixels}$**, proving that without my method, the AI is fooled into thinking the person is far away.
