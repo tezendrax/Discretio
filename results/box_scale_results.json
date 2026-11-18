@@ -1,59 +1,217 @@
 {
-  "Constant Velocity (Kinematic)": {
-    "ground_anchored": {
-      "trajectory_divergence_d_tau": 3.25520829846937e-07,
-      "mean_speed_orig": 40.58722786767578,
-      "mean_speed_intervened": 40.58722686767578,
-      "speed_ratio": 0.9999999753617074,
-      "foot_y_shift": 0.0,
-      "behavioral_hesitation_detected": false,
-      "perspective_depth_confusion": false,
-      "scale_invariant": true
+  "experiment_metadata": {
+    "num_samples": 50,
+    "device": "CPU",
+    "t_obs": 15,
+    "t_pred": 30,
+    "dataset": "IDD-PeD"
+  },
+  "curated_child_manifest": {
+    "total_curated_clips": 10,
+    "outcomes": {
+      "jaywalk": 6,
+      "cross": 3,
+      "wait": 1
     },
-    "centroid_scaled_control": {
-      "trajectory_divergence_d_tau": 14.94838809967041,
-      "mean_speed_orig": 40.58722786767578,
-      "mean_speed_intervened": 40.587215423583984,
-      "speed_ratio": 0.999999693398824,
-      "foot_y_shift": -14.94838809967041,
-      "behavioral_hesitation_detected": false,
-      "perspective_depth_confusion": true,
-      "scale_invariant": false
+    "mean_ped_speed_mps": 4.2206,
+    "mean_ttc_s": 11.714
+  },
+  "benchmark_results": {
+    "Constant Velocity (Kinematic)": {
+      "Tech 1: Ground-Anchored Proportional (\u03b1=0.65)": {
+        "trajectory_divergence_d_tau": 3.25520829846937e-07,
+        "mean_speed_orig": 40.58722786767578,
+        "mean_speed_intervened": 40.58722686767578,
+        "speed_ratio": 0.9999999753617074,
+        "foot_y_shift": 0.0,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 2: Ground-Anchored Height-Only (\u03b1=0.65)": {
+        "trajectory_divergence_d_tau": 3.865559961013787e-07,
+        "mean_speed_orig": 40.58722786767578,
+        "mean_speed_intervened": 40.58722686767578,
+        "speed_ratio": 0.9999999753617074,
+        "foot_y_shift": 0.0,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 3: Moderate Scale (\u03b1=0.80)": {
+        "trajectory_divergence_d_tau": 2.237955669670555e-07,
+        "mean_speed_orig": 40.58722786767578,
+        "mean_speed_intervened": 40.58722686767578,
+        "speed_ratio": 0.9999999753617074,
+        "foot_y_shift": 0.0,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 4: Extreme Child Scale (\u03b1=0.50)": {
+        "trajectory_divergence_d_tau": 2.237955669670555e-07,
+        "mean_speed_orig": 40.58722786767578,
+        "mean_speed_intervened": 40.58722686767578,
+        "speed_ratio": 0.9999999753617074,
+        "foot_y_shift": 0.0,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 5: Centroid Scaling (Control Baseline)": {
+        "trajectory_divergence_d_tau": 14.94838809967041,
+        "mean_speed_orig": 40.58722786767578,
+        "mean_speed_intervened": 40.587215423583984,
+        "speed_ratio": 0.999999693398824,
+        "foot_y_shift": -14.94838809967041,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": true,
+        "scale_invariant": false
+      }
+    },
+    "Neural BBox LSTM (Learned)": {
+      "Tech 1: Ground-Anchored Proportional (\u03b1=0.65)": {
+        "trajectory_divergence_d_tau": 0.274219810962677,
+        "mean_speed_orig": 6.575985477996826,
+        "mean_speed_intervened": 6.808655261993408,
+        "speed_ratio": 1.0353817362850164,
+        "foot_y_shift": -0.1340005099773407,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 2: Ground-Anchored Height-Only (\u03b1=0.65)": {
+        "trajectory_divergence_d_tau": 0.24334265291690826,
+        "mean_speed_orig": 6.575985477996826,
+        "mean_speed_intervened": 6.794982433319092,
+        "speed_ratio": 1.033302530252694,
+        "foot_y_shift": -0.16901220381259918,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 3: Moderate Scale (\u03b1=0.80)": {
+        "trajectory_divergence_d_tau": 0.23877057433128357,
+        "mean_speed_orig": 6.575985477996826,
+        "mean_speed_intervened": 6.822696685791016,
+        "speed_ratio": 1.0375169940109634,
+        "foot_y_shift": -0.15158766508102417,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 4: Extreme Child Scale (\u03b1=0.50)": {
+        "trajectory_divergence_d_tau": 0.2985987067222595,
+        "mean_speed_orig": 6.575985477996826,
+        "mean_speed_intervened": 6.7459611892700195,
+        "speed_ratio": 1.0258479450482259,
+        "foot_y_shift": -0.12658919394016266,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": false,
+        "scale_invariant": true
+      },
+      "Tech 5: Centroid Scaling (Control Baseline)": {
+        "trajectory_divergence_d_tau": 15.094573020935059,
+        "mean_speed_orig": 6.575985477996826,
+        "mean_speed_intervened": 6.8220014572143555,
+        "speed_ratio": 1.0374112716703368,
+        "foot_y_shift": -15.093353271484375,
+        "behavioral_hesitation_detected": false,
+        "perspective_depth_confusion": true,
+        "scale_invariant": false
+      }
     }
   },
-  "Neural BBox LSTM (Learned)": {
-    "ground_anchored": {
-      "trajectory_divergence_d_tau": 0.25859493017196655,
-      "mean_speed_orig": 3.15360526902771,
-      "mean_speed_intervened": 3.3407328128814697,
-      "speed_ratio": 1.0593376557591347,
-      "foot_y_shift": -0.04939927160739899,
-      "behavioral_hesitation_detected": false,
-      "perspective_depth_confusion": false,
-      "scale_invariant": true
+  "summary_table": [
+    {
+      "Model": "Constant Velocity (Kinematic)",
+      "Technique": "Tech 1: Ground-Anchored Proportional (\u03b1=0.65)",
+      "D_tau (px)": 0.0,
+      "Speed Ratio": 1.0,
+      "Foot Shift (px)": 0.0,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
     },
-    "centroid_scaled_control": {
-      "trajectory_divergence_d_tau": 14.928715705871582,
-      "mean_speed_orig": 3.15360526902771,
-      "mean_speed_intervened": 3.2006640434265137,
-      "speed_ratio": 1.0149222145399674,
-      "foot_y_shift": -14.927713394165039,
-      "behavioral_hesitation_detected": false,
-      "perspective_depth_confusion": true,
-      "scale_invariant": false
+    {
+      "Model": "Constant Velocity (Kinematic)",
+      "Technique": "Tech 2: Ground-Anchored Height-Only (\u03b1=0.65)",
+      "D_tau (px)": 0.0,
+      "Speed Ratio": 1.0,
+      "Foot Shift (px)": 0.0,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
+    },
+    {
+      "Model": "Constant Velocity (Kinematic)",
+      "Technique": "Tech 3: Moderate Scale (\u03b1=0.80)",
+      "D_tau (px)": 0.0,
+      "Speed Ratio": 1.0,
+      "Foot Shift (px)": 0.0,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
+    },
+    {
+      "Model": "Constant Velocity (Kinematic)",
+      "Technique": "Tech 4: Extreme Child Scale (\u03b1=0.50)",
+      "D_tau (px)": 0.0,
+      "Speed Ratio": 1.0,
+      "Foot Shift (px)": 0.0,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
+    },
+    {
+      "Model": "Constant Velocity (Kinematic)",
+      "Technique": "Tech 5: Centroid Scaling (Control Baseline)",
+      "D_tau (px)": 14.95,
+      "Speed Ratio": 1.0,
+      "Foot Shift (px)": -14.95,
+      "Perspective Preserved": false,
+      "Finding": "Depth Confused"
+    },
+    {
+      "Model": "Neural BBox LSTM (Learned)",
+      "Technique": "Tech 1: Ground-Anchored Proportional (\u03b1=0.65)",
+      "D_tau (px)": 0.27,
+      "Speed Ratio": 1.035,
+      "Foot Shift (px)": -0.13,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
+    },
+    {
+      "Model": "Neural BBox LSTM (Learned)",
+      "Technique": "Tech 2: Ground-Anchored Height-Only (\u03b1=0.65)",
+      "D_tau (px)": 0.24,
+      "Speed Ratio": 1.033,
+      "Foot Shift (px)": -0.17,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
+    },
+    {
+      "Model": "Neural BBox LSTM (Learned)",
+      "Technique": "Tech 3: Moderate Scale (\u03b1=0.80)",
+      "D_tau (px)": 0.24,
+      "Speed Ratio": 1.038,
+      "Foot Shift (px)": -0.15,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
+    },
+    {
+      "Model": "Neural BBox LSTM (Learned)",
+      "Technique": "Tech 4: Extreme Child Scale (\u03b1=0.50)",
+      "D_tau (px)": 0.3,
+      "Speed Ratio": 1.026,
+      "Foot Shift (px)": -0.13,
+      "Perspective Preserved": true,
+      "Finding": "Scale Invariant"
+    },
+    {
+      "Model": "Neural BBox LSTM (Learned)",
+      "Technique": "Tech 5: Centroid Scaling (Control Baseline)",
+      "D_tau (px)": 15.09,
+      "Speed Ratio": 1.037,
+      "Foot Shift (px)": -15.09,
+      "Perspective Preserved": false,
+      "Finding": "Depth Confused"
     }
-  }
+  ]
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
